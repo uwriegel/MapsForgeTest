@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Environment
 import android.view.View
 import android.view.WindowManager
 import org.mapsforge.core.model.LatLong
@@ -21,11 +20,12 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Build
 import android.support.annotation.RequiresApi
+import android.support.v4.content.ContextCompat
 import android.widget.Toast
 
+// TODO: Cache tiles
 // TODO: Grant permissions ohne eigenen Dialog
 // TODO: Speichere letzten Standort
-// TODO: Access file from sd-Card
 // TODO: overlay track
 // TODO: Bewebungsrichtung oben
 
@@ -34,6 +34,12 @@ class MainActivity() : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val externalStorageFiles = ContextCompat.getExternalFilesDirs(this,null)
+        externalDrive =
+                externalStorageFiles
+                        .map { getRootOfExternalStorage(it, this) }
+                        .filter { !it.contains("emulated") }.first()
 
         AndroidGraphicFactory.createInstance(application)
 
@@ -181,7 +187,7 @@ class MainActivity() : AppCompatActivity() {
                 mapView.getModel().frameBufferModel.overdrawFactor)
 
         // tile renderer layer using internal render theme
-        val mapDataStore = MapFile(File(Environment.getExternalStorageDirectory(), MAP_FILE))
+        val mapDataStore = MapFile(File("$externalDrive/Maps", MAP_FILE))
         val tileRendererLayer = TileRendererLayer(tileCache, mapDataStore, mapView.model.mapViewPosition,
                 AndroidGraphicFactory.INSTANCE)
         tileRendererLayer.setXmlRenderTheme(InternalRenderTheme.DEFAULT)
@@ -198,6 +204,7 @@ class MainActivity() : AppCompatActivity() {
 
     private lateinit var mapView: MapView
     private lateinit var locationManager: LocationManager
+    private lateinit var externalDrive: String
 
     companion object {
         val REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 1000
