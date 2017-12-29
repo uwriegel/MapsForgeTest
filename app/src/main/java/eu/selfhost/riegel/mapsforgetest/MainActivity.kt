@@ -7,8 +7,6 @@ import android.location.Location
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
 import android.view.View
 import android.view.WindowManager
 import org.mapsforge.core.model.LatLong
@@ -25,12 +23,31 @@ import android.os.Build
 import android.support.annotation.RequiresApi
 import android.widget.Toast
 
+// TODO: Grant permissions ohne eigenen Dialog
+// TODO: Speichere letzten Standort
+// TODO: Access file from sd-Card
+// TODO: overlay track
+// TODO: Bewebungsrichtung oben
 
-class MainActivity : AppCompatActivity() {
+class MainActivity() : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        AndroidGraphicFactory.createInstance(application)
+
+        locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
+
+        mapView = MapView(this)
+        setContentView(mapView)
+
+        mapView.isClickable = true
+        mapView.mapScaleBar.isVisible = true
+        mapView.setBuiltInZoomControls(true)
+        mapView.setZoomLevelMin(6.toByte())
+        mapView.setZoomLevelMax(20.toByte())
+
         if (checkPermissions())
             initializeMapView()
     }
@@ -81,8 +98,7 @@ class MainActivity : AppCompatActivity() {
 
     private val locationListener = object : LocationListener {
         override fun onLocationChanged(location: Location) {
-            mapView!!.setCenter(LatLong(location.latitude, location.longitude))
-            //mapView!!.setCenter(LatLong(52.517037, 13.38886))
+            mapView.setCenter(LatLong(location.latitude, location.longitude))
         }
 
         override fun onProviderEnabled(p0: String?) {
@@ -159,42 +175,29 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("MissingPermission")
     private fun initializeMapView() {
-        AndroidGraphicFactory.createInstance(application)
-
-        mapView = MapView(this)
-        setContentView(mapView)
-
-        mapView!!.isClickable = true
-        mapView!!.mapScaleBar.isVisible = true
-        mapView!!.setBuiltInZoomControls(true)
-        mapView!!.setZoomLevelMin(6.toByte())
-        mapView!!.setZoomLevelMax(20.toByte())
-
         // create a tile cache of suitable size
         val tileCache = AndroidUtil.createTileCache(this, "mapcache",
-                mapView!!.getModel().displayModel.tileSize, 1f,
-                mapView!!.getModel().frameBufferModel.overdrawFactor)
+                mapView.getModel().displayModel.tileSize, 1f,
+                mapView.getModel().frameBufferModel.overdrawFactor)
 
         // tile renderer layer using internal render theme
         val mapDataStore = MapFile(File(Environment.getExternalStorageDirectory(), MAP_FILE))
-        val tileRendererLayer = TileRendererLayer(tileCache, mapDataStore, mapView!!.model.mapViewPosition,
+        val tileRendererLayer = TileRendererLayer(tileCache, mapDataStore, mapView.model.mapViewPosition,
                 AndroidGraphicFactory.INSTANCE)
         tileRendererLayer.setXmlRenderTheme(InternalRenderTheme.DEFAULT)
 
         // only once a layer is associated with a mapView the rendering starts
-        mapView!!.layerManager.layers.add(tileRendererLayer)
-        mapView!!.setZoomLevel(12.toByte())
+        mapView.layerManager.layers.add(tileRendererLayer)
+        mapView.setZoomLevel(12.toByte())
 
-        locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
-        locationManager!!.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_REFRESH_TIME, LOCATION_REFRESH_DISTANCE, locationListener)
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_REFRESH_TIME, LOCATION_REFRESH_DISTANCE, locationListener)
     }
 
     // name of the map file in the external storage
     private val MAP_FILE = "germany.map"
 
-    // TODO: initialize here?
-    private var mapView: MapView? = null
-    private var locationManager: LocationManager? = null
+    private lateinit var mapView: MapView
+    private lateinit var locationManager: LocationManager
 
     companion object {
         val REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 1000
