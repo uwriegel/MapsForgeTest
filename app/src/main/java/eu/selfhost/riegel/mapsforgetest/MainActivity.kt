@@ -2,6 +2,7 @@ package eu.selfhost.riegel.mapsforgetest
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.support.v7.app.AppCompatActivity
@@ -24,7 +25,8 @@ import android.support.v4.content.ContextCompat
 import android.widget.Toast
 
 // TODO: Cache tiles
-// TODO: Speichere letzten Standort und Zoom-Auflösung
+// TODO: Speichere letzten Standort
+// TODO: Absturz beim Beenden, Neustarten, Beenden, ... OutOfMemory
 // TODO: overlay track
 // TODO: Bewegungsrichtung oben, rotate viewer
 
@@ -52,6 +54,8 @@ class MainActivity() : AppCompatActivity() {
         mapView.setZoomLevelMin(6.toByte())
         mapView.setZoomLevelMax(20.toByte())
 
+        mapView.setZoomLevel(getSharedPreferences(SETTINGS, Context.MODE_PRIVATE).getInt(PREF_ZOOMLEVEL, 12).toByte())
+
         if (checkPermissions())
             initializeMapView()
     }
@@ -60,6 +64,20 @@ class MainActivity() : AppCompatActivity() {
         super.onResume()
 
         window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        val sharedPreferences = getSharedPreferences(SETTINGS, Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putInt(PREF_ZOOMLEVEL, mapView.model.mapViewPosition.zoomLevel.toInt())
+        editor.apply()
+
+        //mapView.model.mapViewPosition.center
+
+        mapView.layerManager.layers.remove(tileRendererLayer)
+        tileRendererLayer.onDestroy()
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -133,32 +151,33 @@ class MainActivity() : AppCompatActivity() {
     private fun initializeMapView() {
         // create a tile cache of suitable size
         val tileCache = AndroidUtil.createTileCache(this, "mapcache",
-                mapView.getModel().displayModel.tileSize, 1f,
-                mapView.getModel().frameBufferModel.overdrawFactor)
+                mapView.model.displayModel.tileSize, 1f,
+                mapView.model.frameBufferModel.overdrawFactor)
 
         // tile renderer layer using internal render theme
         val mapDataStore = MapFile(File("$externalDrive/Maps", MAP_FILE))
-        val tileRendererLayer = TileRendererLayer(tileCache, mapDataStore, mapView.model.mapViewPosition,
+        tileRendererLayer = TileRendererLayer(tileCache, mapDataStore, mapView.model.mapViewPosition,
                 AndroidGraphicFactory.INSTANCE)
         tileRendererLayer.setXmlRenderTheme(InternalRenderTheme.DEFAULT)
 
         // only once a layer is associated with a mapView the rendering starts
         mapView.layerManager.layers.add(tileRendererLayer)
-        mapView.setZoomLevel(12.toByte())
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_REFRESH_TIME, LOCATION_REFRESH_DISTANCE, locationListener)
+        //locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_REFRESH_TIME, LOCATION_REFRESH_DISTANCE, locationListener)
     }
 
-    // name of the map file in the external storage
     private val MAP_FILE = "germany.map"
 
     private lateinit var mapView: MapView
     private lateinit var locationManager: LocationManager
     private lateinit var externalDrive: String
+    private lateinit var tileRendererLayer: TileRendererLayer
 
     companion object {
         val REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 1000
         val LOCATION_REFRESH_TIME = 1000L
         val LOCATION_REFRESH_DISTANCE = 1.0F
+        private val SETTINGS = "settings"
+        private val PREF_ZOOMLEVEL = "zoomlevel"
     }
 }
