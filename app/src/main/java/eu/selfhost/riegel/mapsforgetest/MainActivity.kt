@@ -24,14 +24,12 @@ import android.support.v4.content.ContextCompat
 import android.widget.Toast
 
 // TODO: Cache tiles
-// TODO: Grant permissions ohne eigenen Dialog
-// TODO: Speichere letzten Standort
+// TODO: Speichere letzten Standort und Zoom-Auflösung
 // TODO: overlay track
-// TODO: Bewebungsrichtung oben
+// TODO: Bewegungsrichtung oben, rotate viewer
 
 class MainActivity() : AppCompatActivity() {
 
-    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -39,7 +37,7 @@ class MainActivity() : AppCompatActivity() {
         externalDrive =
                 externalStorageFiles
                         .map { getRootOfExternalStorage(it, this) }
-                        .filter { !it.contains("emulated") }.first()
+                        .first { !it.contains("emulated") }
 
         AndroidGraphicFactory.createInstance(application)
 
@@ -68,13 +66,12 @@ class MainActivity() : AppCompatActivity() {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) {
             val decorView = window.decorView
-            decorView.setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                            or View.SYSTEM_UI_FLAG_FULLSCREEN
-                            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+            decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
         }
     }
 
@@ -87,18 +84,18 @@ class MainActivity() : AppCompatActivity() {
                 perms.put(Manifest.permission.WRITE_EXTERNAL_STORAGE, PackageManager.PERMISSION_GRANTED)
                 // Fill with results
                 for ((index, value) in permissions.withIndex())
-                    perms.put(value, grantResults[index]);
+                    perms.put(value, grantResults[index])
                 // Check for ACCESS_FINE_LOCATION
                 if (perms.get(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                         && perms.get(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
-//                    // All Permissions Granted
+                    // All Permissions Granted
                     initializeMapView()
                 else
                     // Permission Denied
-                    Toast.makeText(this, "Some Permission is Denied", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Some Permission is Denied", Toast.LENGTH_SHORT).show()
             }
             else ->
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
     }
 
@@ -117,64 +114,17 @@ class MainActivity() : AppCompatActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     private fun checkPermissions(): Boolean {
-        val permissionsNeeded = ArrayList<String>()
         val permissionsList = ArrayList<String>()
-        if (!addPermission(permissionsList, Manifest.permission.ACCESS_FINE_LOCATION))
-            permissionsNeeded.add("GPS");
-        if (!addPermission(permissionsList, Manifest.permission.WRITE_EXTERNAL_STORAGE))
-            permissionsNeeded.add("Zugriff auf persönliche Daten");
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+            permissionsList.add(Manifest.permission.ACCESS_FINE_LOCATION)
+        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+            permissionsList.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
-        if (permissionsList.size > 0) {
-            if (permissionsNeeded.size > 0) {
-                // Need Rationale
-//                var message = "You need to grant access to " + permissionsNeeded.get(0)
-//                for ((index, value) in permissionsNeeded.withIndex()) {
-//                    message = message + ", " + permissionsNeeded.get(index)
-//                    showMessageOKCancel(message,
-//                        new DialogInterface . OnClickListener () {
-//                            @Override
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                requestPermissions(permissionsList.toArray(new String [permissionsList.size()]),
-//                                        REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
-//                            }
-//                        });
-//                return;
-            }
-            requestPermissions(permissionsList.toTypedArray(), REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS)
+        val permissions = permissionsList.toTypedArray()
+        if (permissions.count() > 0) {
+            requestPermissions(permissions, REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS)
             return false
-        }
-        return true
-    }
-
-//        var result = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-//        result = result && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-//        return result
-//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-//            // Should we show an explanation?
-//            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-//                // Show an explanation to the user *asynchronously* -- don't block
-//                // this thread waiting for the user's response! After the user
-//                // sees the explanation, try again to request the permission.
-//            } else
-//                // No explanation needed, we can request the permission.
-//                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE)
-//                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-//                // app-defined int constant. The callback method gets the
-//                // result of the request.
-//            return false
-//        }
-//        else
-//            return true
-
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun addPermission(permissionsList: MutableList<String>, permission: String): Boolean {
-        if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
-            permissionsList.add(permission)
-            // Check for Rationale Option
-            if (!shouldShowRequestPermissionRationale(permission))
-                return false
         }
         return true
     }

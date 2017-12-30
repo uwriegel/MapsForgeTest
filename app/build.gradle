@@ -8,7 +8,8 @@ android {
     compileSdkVersion 26
     defaultConfig {
         applicationId "eu.selfhost.riegel.mapsforgetest"
-        minSdkVersion 22
+        minSdkVersion 23
+        //noinspection OldTargetApi
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
