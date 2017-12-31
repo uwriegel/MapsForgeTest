@@ -24,11 +24,10 @@ import android.support.annotation.RequiresApi
 import android.support.v4.content.ContextCompat
 import android.widget.Toast
 
-// TODO: Cache tiles
-// TODO: Speichere letzten Standort
-// TODO: Absturz beim Beenden, Neustarten, Beenden, ... OutOfMemory
+// TODO: SimplestMapViewer einbinden
+// TODO: Eigene Controls für Zoom, Maßstab und StartGps
+// TODO: RotateViewer
 // TODO: overlay track
-// TODO: Bewegungsrichtung oben, rotate viewer
 
 class MainActivity() : AppCompatActivity() {
 
