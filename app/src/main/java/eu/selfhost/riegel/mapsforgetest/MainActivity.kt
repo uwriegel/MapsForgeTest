@@ -3,7 +3,10 @@ package eu.selfhost.riegel.mapsforgetest
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
+import android.widget.Button
+import android.widget.ImageButton
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory
+import org.mapsforge.map.android.rotation.RotateView
 import org.mapsforge.map.android.util.AndroidUtil
 import org.mapsforge.map.rendertheme.InternalRenderTheme
 import java.io.File
@@ -13,7 +16,7 @@ import org.mapsforge.map.scalebar.DefaultMapScaleBar
 import org.mapsforge.map.scalebar.ImperialUnitAdapter
 import org.mapsforge.map.scalebar.MetricUnitAdapter
 
-// TODO: Eigene Controls für Zoom, Maßstab und StartGps
+// TODO: Eigene Controls für StartGps
 // TODO: RotateViewer
 // TODO: overlay track
 class MainActivity() : MapViewerTemplate() {
@@ -57,6 +60,20 @@ class MainActivity() : MapViewerTemplate() {
         return File(dir + "/Maps")
     }
 
+    protected override fun createControls() {
+//        val rotateButton = findViewById(R.id.rotateButton) as Button
+//        rotateButton.setOnClickListener {
+//            val rotateView = findViewById(R.id.rotateView) as RotateView
+//            rotateView.heading = rotateView.heading - 45f
+//            rotateView.postInvalidate()
+//        }
+
+        val zoomInButton = findViewById<ImageButton>(R.id.zoomInButton)
+        zoomInButton.setOnClickListener { mapView.model.mapViewPosition.zoomIn() }
+
+        val zoomOutButton = findViewById<ImageButton>(R.id.zoomOutButton)
+        zoomOutButton.setOnClickListener { mapView.model.mapViewPosition.zoomOut() }
+    }
     /**
      * Creates a simple tile renderer layer with the AndroidUtil helper.
      */
