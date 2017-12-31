@@ -1,32 +1,14 @@
 package eu.selfhost.riegel.mapsforgetest
 
-import android.Manifest
-import android.annotation.SuppressLint
-import android.content.Context
-import android.content.pm.PackageManager
-import android.location.Location
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
-import org.mapsforge.core.model.LatLong
-import org.mapsforge.map.android.graphics.AndroidGraphicFactory
 import org.mapsforge.map.android.util.AndroidUtil
-import org.mapsforge.map.android.view.MapView
-import org.mapsforge.map.layer.renderer.TileRendererLayer
-import org.mapsforge.map.reader.MapFile
 import org.mapsforge.map.rendertheme.InternalRenderTheme
 import java.io.File
-import android.location.LocationListener
-import android.location.LocationManager
-import android.os.Build
-import android.support.annotation.RequiresApi
-import android.support.v4.content.ContextCompat
-import android.widget.Toast
 import org.mapsforge.map.android.util.MapViewerTemplate
 import org.mapsforge.map.rendertheme.XmlRenderTheme
 
-// TODO: Permission request
 // TODO: Eigene Controls für Zoom, Maßstab und StartGps
 // TODO: RotateViewer
 // TODO: overlay track
@@ -123,32 +105,6 @@ class MainActivity() : MapViewerTemplate() {
 
 //        locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
 //
-//
-//
-//    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-//        when (requestCode) {
-//            REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS -> {
-//                val perms = HashMap<String, Int>()
-//                // Initial
-//                perms.put(Manifest.permission.ACCESS_FINE_LOCATION, PackageManager.PERMISSION_GRANTED)
-//                perms.put(Manifest.permission.WRITE_EXTERNAL_STORAGE, PackageManager.PERMISSION_GRANTED)
-//                // Fill with results
-//                for ((index, value) in permissions.withIndex())
-//                    perms.put(value, grantResults[index])
-//                // Check for ACCESS_FINE_LOCATION
-//                if (perms.get(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-//                        && perms.get(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
-//                    // All Permissions Granted
-//                    initializeMapView()
-//                else
-//                    // Permission Denied
-//                    Toast.makeText(this, "Some Permission is Denied", Toast.LENGTH_SHORT).show()
-//            }
-//            else ->
-//                super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-//        }
-//    }
-//
 //    private val locationListener = object : LocationListener {
 //        override fun onLocationChanged(location: Location) {
 //            mapView.setCenter(LatLong(location.latitude, location.longitude))
@@ -164,36 +120,6 @@ class MainActivity() : MapViewerTemplate() {
 //        }
 //    }
 //
-//    private fun checkPermissions(): Boolean {
-//        val permissionsList = ArrayList<String>()
-//        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-//            permissionsList.add(Manifest.permission.ACCESS_FINE_LOCATION)
-//        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-//            permissionsList.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-//
-//        val permissions = permissionsList.toTypedArray()
-//        if (permissions.count() > 0) {
-//            requestPermissions(permissions, REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS)
-//            return false
-//        }
-//        return true
-//    }
-//
-//    @SuppressLint("MissingPermission")
-//    private fun initializeMapView() {
-//        // create a tile cache of suitable size
-//        val tileCache = AndroidUtil.createTileCache(this, "mapcache",
-//                mapView.model.displayModel.tileSize, 1f,
-//                mapView.model.frameBufferModel.overdrawFactor)
-//
-//        // tile renderer layer using internal render theme
-//        val mapDataStore = MapFile(File("$externalDrive/Maps", MAP_FILE))
-//        tileRendererLayer = TileRendererLayer(tileCache, mapDataStore, mapView.model.mapViewPosition,
-//                AndroidGraphicFactory.INSTANCE)
-//        tileRendererLayer.setXmlRenderTheme(InternalRenderTheme.DEFAULT)
-//
-//        // only once a layer is associated with a mapView the rendering starts
-//        mapView.layerManager.layers.add(tileRendererLayer)
 //
 //        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_REFRESH_TIME, LOCATION_REFRESH_DISTANCE, locationListener)
 //    }
