@@ -3,11 +3,15 @@ package eu.selfhost.riegel.mapsforgetest
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
+import org.mapsforge.map.android.graphics.AndroidGraphicFactory
 import org.mapsforge.map.android.util.AndroidUtil
 import org.mapsforge.map.rendertheme.InternalRenderTheme
 import java.io.File
 import org.mapsforge.map.android.util.MapViewerTemplate
 import org.mapsforge.map.rendertheme.XmlRenderTheme
+import org.mapsforge.map.scalebar.DefaultMapScaleBar
+import org.mapsforge.map.scalebar.ImperialUnitAdapter
+import org.mapsforge.map.scalebar.MetricUnitAdapter
 
 // TODO: Eigene Controls für Zoom, Maßstab und StartGps
 // TODO: RotateViewer
@@ -63,7 +67,32 @@ class MainActivity() : MapViewerTemplate() {
     }
 
     override fun createMapViews() {
-        super.createMapViews()
+        mapView = getMapView()
+
+        mapView.model.frameBufferModel.overdrawFactor = 1.0
+        mapView.model.init(this.preferencesFacade)
+        mapView.isClickable = true
+
+        // Use external scale bar
+        mapView.mapScaleBar.isVisible = false
+
+        val mapScaleBar = MapScaleBarImpl(
+                mapView.model.mapViewPosition,
+                mapView.model.mapViewDimension,
+                AndroidGraphicFactory.INSTANCE, mapView.model.displayModel)
+        mapScaleBar.isVisible = true
+        mapScaleBar.scaleBarMode = DefaultMapScaleBar.ScaleBarMode.BOTH
+        mapScaleBar.distanceUnitAdapter = MetricUnitAdapter.INSTANCE
+        mapScaleBar.secondaryDistanceUnitAdapter = ImperialUnitAdapter.INSTANCE
+        val mapScaleBarView = findViewById(R.id.mapScaleBarView) as MapScaleBarView
+        mapScaleBarView.setMapScaleBar(mapScaleBar)
+        mapView.model.mapViewPosition.addObserver(mapScaleBarView)
+
+
+        mapView.setBuiltInZoomControls(false)
+        mapView.mapZoomControls.zoomLevelMin = zoomLevelMin
+        mapView.mapZoomControls.zoomLevelMax = zoomLevelMax
+        initializePosition(mapView.model.mapViewPosition)
     }
 
     /**
