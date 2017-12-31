@@ -41,8 +41,6 @@ class MainActivity() : AppCompatActivity() {
                         .map { getRootOfExternalStorage(it, this) }
                         .first { !it.contains("emulated") }
 
-        AndroidGraphicFactory.createInstance(application)
-
         locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
 
         mapView = MapView(this)
@@ -78,6 +76,12 @@ class MainActivity() : AppCompatActivity() {
 
         mapView.layerManager.layers.remove(tileRendererLayer)
         tileRendererLayer.onDestroy()
+    }
+
+    override fun onDestroy() {
+        mapView.destroyAll()
+        AndroidGraphicFactory.clearResourceMemoryCache()
+        super.onDestroy()
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -163,7 +167,7 @@ class MainActivity() : AppCompatActivity() {
         // only once a layer is associated with a mapView the rendering starts
         mapView.layerManager.layers.add(tileRendererLayer)
 
-        //locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_REFRESH_TIME, LOCATION_REFRESH_DISTANCE, locationListener)
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_REFRESH_TIME, LOCATION_REFRESH_DISTANCE, locationListener)
     }
 
     private val MAP_FILE = "germany.map"
