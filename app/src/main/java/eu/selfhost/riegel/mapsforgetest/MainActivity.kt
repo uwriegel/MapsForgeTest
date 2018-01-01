@@ -21,9 +21,10 @@ import org.mapsforge.map.scalebar.DefaultMapScaleBar
 import org.mapsforge.map.scalebar.ImperialUnitAdapter
 import org.mapsforge.map.scalebar.MetricUnitAdapter
 
-// TODO: overlay track
+
+// TODO: Multiple Maps
+// TODO: Holland Track, delete tracker app
 // TODO: Compass for heading or heading null
-// TODO: Eigene Controls für StartGps
 class MainActivity() : MapViewerTemplate() {
 
     /**
@@ -77,6 +78,24 @@ class MainActivity() : MapViewerTemplate() {
         val gpsButton = findViewById<Button>(R.id.gpsButton)
         gpsButton.setOnClickListener {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_REFRESH_TIME, LOCATION_REFRESH_DISTANCE, locationListener)
+        }
+
+        val trackButton = findViewById<Button>(R.id.trackButton)
+        trackButton.setOnClickListener {
+            polyline = AlternatingLine(AndroidGraphicFactory.INSTANCE)
+
+            val latLongs = polyline.latLongs
+            var latLong: LatLong
+
+            val gpxFile = "${getExternalStorageDirectory(this)}/Maps/track.gpx"
+            for (trackPoint in TrackGpxParser(File(gpxFile))) {
+                latLong = trackPoint
+                latLongs.add(latLong)
+            }
+            // add: mapView.getModel().mapViewPosition.setMapPosition(new MapPosition(bb.getCenterPoint(), LatLongUtils.zoomForBounds(dimension, bb, mapView.getModel().displayModel.getTileSize())));
+            // warp to track
+            mapView.model.mapViewPosition.center = latLongs[0]
+            mapView.layerManager.layers.add(polyline)
         }
 
         val zoomInButton = findViewById<ImageButton>(R.id.zoomInButton)
@@ -178,6 +197,7 @@ class MainActivity() : MapViewerTemplate() {
     }
 
     private lateinit var locationManager: LocationManager
+    private lateinit var polyline: AlternatingLine
 
     companion object {
         val LOCATION_REFRESH_TIME = 1000L
