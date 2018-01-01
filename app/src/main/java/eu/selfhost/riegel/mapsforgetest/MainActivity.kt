@@ -1,10 +1,15 @@
 package eu.selfhost.riegel.mapsforgetest
 
+import android.annotation.SuppressLint
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.ImageButton
+import org.mapsforge.core.model.LatLong
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory
 import org.mapsforge.map.android.rotation.RotateView
 import org.mapsforge.map.android.util.AndroidUtil
@@ -16,9 +21,9 @@ import org.mapsforge.map.scalebar.DefaultMapScaleBar
 import org.mapsforge.map.scalebar.ImperialUnitAdapter
 import org.mapsforge.map.scalebar.MetricUnitAdapter
 
-// TODO: Eigene Controls für StartGps
-// TODO: RotateViewer
 // TODO: overlay track
+// TODO: Compass for heading or heading null
+// TODO: Eigene Controls für StartGps
 class MainActivity() : MapViewerTemplate() {
 
     /**
@@ -60,12 +65,18 @@ class MainActivity() : MapViewerTemplate() {
         return File(dir + "/Maps")
     }
 
+    @SuppressLint("MissingPermission")
     protected override fun createControls() {
-        val rotateButton = findViewById(R.id.rotateButton) as Button
+        val rotateButton = findViewById<Button>(R.id.rotateButton)
         rotateButton.setOnClickListener {
-            val rotateView = findViewById(R.id.rotateView) as RotateView
+            val rotateView = findViewById<RotateView>(R.id.rotateView)
             rotateView.heading = rotateView.heading - 45f
             rotateView.postInvalidate()
+        }
+
+        val gpsButton = findViewById<Button>(R.id.gpsButton)
+        gpsButton.setOnClickListener {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_REFRESH_TIME, LOCATION_REFRESH_DISTANCE, locationListener)
         }
 
         val zoomInButton = findViewById<ImageButton>(R.id.zoomInButton)
@@ -106,11 +117,12 @@ class MainActivity() : MapViewerTemplate() {
         mapScaleBarView.setMapScaleBar(mapScaleBar)
         mapView.model.mapViewPosition.addObserver(mapScaleBarView)
 
-
         mapView.setBuiltInZoomControls(false)
         mapView.mapZoomControls.zoomLevelMin = zoomLevelMin
         mapView.mapZoomControls.zoomLevelMax = zoomLevelMax
         initializePosition(mapView.model.mapViewPosition)
+
+        locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
     }
 
     /**
@@ -118,15 +130,13 @@ class MainActivity() : MapViewerTemplate() {
      */
     override fun createTileCaches() {
         this.tileCaches.add(AndroidUtil.createTileCache(this, persistableId,
-                this.mapView.model.displayModel.tileSize, this.screenRatio,
-                this.mapView.model.frameBufferModel.overdrawFactor))
+                mapView.model.displayModel.tileSize, this.screenRatio,
+                mapView.model.frameBufferModel.overdrawFactor))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         title = javaClass.simpleName
-
-        //this.mapView.setCenter(LatLong(52.5, 13.4))
     }
 
     override fun onResume() {
@@ -147,38 +157,32 @@ class MainActivity() : MapViewerTemplate() {
                     or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
         }
     }
+
+    private val locationListener = object : LocationListener {
+        override fun onLocationChanged(location: Location) {
+            if (location.hasBearing()) {
+                val affe = 2
+                val aff = affe +8
+            }
+            mapView.setCenter(LatLong(location.latitude, location.longitude))
+        }
+
+        override fun onProviderEnabled(p0: String?) {
+        }
+
+        override fun onStatusChanged(p0: String?, p1: Int, p2: Bundle?) {
+        }
+
+        override fun onProviderDisabled(p0: String?) {
+        }
+    }
+
+    private lateinit var locationManager: LocationManager
+
+    companion object {
+        val LOCATION_REFRESH_TIME = 1000L
+        val LOCATION_REFRESH_DISTANCE = 0.0F
+    }
 }
 
 
-//        locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
-//
-//    private val locationListener = object : LocationListener {
-//        override fun onLocationChanged(location: Location) {
-//            mapView.setCenter(LatLong(location.latitude, location.longitude))
-//        }
-//
-//        override fun onProviderEnabled(p0: String?) {
-//        }
-//
-//        override fun onStatusChanged(p0: String?, p1: Int, p2: Bundle?) {
-//        }
-//
-//        override fun onProviderDisabled(p0: String?) {
-//        }
-//    }
-//
-//
-//        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_REFRESH_TIME, LOCATION_REFRESH_DISTANCE, locationListener)
-//    }
-//
-//    private lateinit var locationManager: LocationManager
-//    private lateinit var tileRendererLayer: TileRendererLayer
-//
-//    companion object {
-//        val REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 1000
-//        val LOCATION_REFRESH_TIME = 1000L
-//        val LOCATION_REFRESH_DISTANCE = 1.0F
-//        private val SETTINGS = "settings"
-//        private val PREF_ZOOMLEVEL = "zoomlevel"
-//    }
-//}
