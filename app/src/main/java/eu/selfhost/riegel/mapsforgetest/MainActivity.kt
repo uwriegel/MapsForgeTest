@@ -22,8 +22,7 @@ import org.mapsforge.map.scalebar.ImperialUnitAdapter
 import org.mapsforge.map.scalebar.MetricUnitAdapter
 
 
-// TODO: Multiple Maps
-// TODO: Holland Track, delete tracker app
+
 // TODO: Compass for heading or heading null
 class MainActivity() : MapViewerTemplate() {
 
