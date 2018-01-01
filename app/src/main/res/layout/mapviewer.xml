@@ -5,10 +5,16 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
-    <org.mapsforge.map.android.view.MapView
-        android:id="@+id/mapView"
+    <org.mapsforge.map.android.rotation.RotateView
+        android:id="@+id/rotateView"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />
+        android:layout_height="fill_parent">
+
+        <org.mapsforge.map.android.view.MapView
+            android:id="@+id/mapView"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" />
+    </org.mapsforge.map.android.rotation.RotateView>
 
     <eu.selfhost.riegel.mapsforgetest.MapScaleBarView
         android:id="@+id/mapScaleBarView"
@@ -35,6 +41,14 @@
         android:layout_alignParentRight="true"
         android:background="@android:color/transparent"
         android:src="@drawable/zoom_control_in" />
+
+    <Button
+        android:id="@+id/rotateButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toLeftOf="@+id/zoomOutButton"
+        android:text="R" />
 
     <TextView
         android:id="@+id/attribution"

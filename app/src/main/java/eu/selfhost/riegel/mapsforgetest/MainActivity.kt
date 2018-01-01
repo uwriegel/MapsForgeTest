@@ -61,12 +61,12 @@ class MainActivity() : MapViewerTemplate() {
     }
 
     protected override fun createControls() {
-//        val rotateButton = findViewById(R.id.rotateButton) as Button
-//        rotateButton.setOnClickListener {
-//            val rotateView = findViewById(R.id.rotateView) as RotateView
-//            rotateView.heading = rotateView.heading - 45f
-//            rotateView.postInvalidate()
-//        }
+        val rotateButton = findViewById(R.id.rotateButton) as Button
+        rotateButton.setOnClickListener {
+            val rotateView = findViewById(R.id.rotateView) as RotateView
+            rotateView.heading = rotateView.heading - 45f
+            rotateView.postInvalidate()
+        }
 
         val zoomInButton = findViewById<ImageButton>(R.id.zoomInButton)
         zoomInButton.setOnClickListener { mapView.model.mapViewPosition.zoomIn() }
@@ -85,6 +85,7 @@ class MainActivity() : MapViewerTemplate() {
 
     override fun createMapViews() {
         mapView = getMapView()
+        findViewById<RotateView>(R.id.rotateView).setLayerType(View.LAYER_TYPE_SOFTWARE, null)
 
         mapView.model.frameBufferModel.overdrawFactor = 1.0
         mapView.model.init(this.preferencesFacade)
